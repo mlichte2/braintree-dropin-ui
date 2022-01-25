@@ -1,6 +1,6 @@
 // dummy data
 let threeDSecureParameters = {
-  amount: "20",
+  amount: "250",
   email: "test@example.com",
   billingAddress: {
     givenName: "Jill", // ASCII-printable characters required, else will throw a validation error

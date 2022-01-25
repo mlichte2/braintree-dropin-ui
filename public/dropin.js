@@ -1,5 +1,5 @@
 // dummy data
-var threeDSecureParameters = {
+let threeDSecureParameters = {
   amount: "20",
   email: "test@example.com",
   billingAddress: {
@@ -41,6 +41,26 @@ const createDropIn = (clientToken) => {
       authorization: clientToken.braintreeclienttoken,
       container: "#dropin-container",
       threeDSecure: true,
+      googlePay: {
+        googlePayVersion: 2,
+        transactionInfo: {
+          totalPriceStatus: "FINAL",
+          totalPrice: "123.45",
+          currencyCode: "USD",
+        },
+        allowedPaymentMethods: [
+          {
+            type: "CARD",
+            parameters: {
+              // We recommend collecting and passing billing address information with all Google Pay transactions as a best practice.
+              billingAddressRequired: false,
+              billingAddressParameters: {
+                format: "FULL",
+              },
+            },
+          },
+        ],
+      },
     },
     function (err, dropinInstance) {
       if (err) {
@@ -48,7 +68,28 @@ const createDropIn = (clientToken) => {
         console.error(err);
         return;
       }
-      var requestPaymentMethodButton = document.querySelector("#submit-button");
+      // testing GooglePay Update
+      // adding event listener + button to update drop in config https://braintree.github.io/braintree-web-drop-in/docs/current/Dropin.html#updateConfiguration
+
+      const updateButton = document.querySelector("#update-dropin-config");
+      updateButton.addEventListener("click", async function (event) {
+        event.preventDefault();
+        await dropinInstance.updateConfiguration(
+          "googlePay",
+          "transactionInfo",
+          {
+            totalPrice: "200.00",
+            totalPriceStatus: "FINAL",
+            currencyCode: "USD",
+          }
+        );
+        console.log(
+          dropinInstance._merchantConfiguration.googlePay.transactionInfo
+        );
+      });
+
+      // request payment method payload from drop-in
+      let requestPaymentMethodButton = document.querySelector("#submit-button");
       requestPaymentMethodButton.addEventListener("click", function (e) {
         e.preventDefault();
         dropinInstance.requestPaymentMethod(
@@ -60,7 +101,7 @@ const createDropIn = (clientToken) => {
               console.log(err);
             } else {
               console.log(payload);
-              var payButton = document.querySelector("#pay-button");
+              let payButton = document.querySelector("#pay-button");
               payButton.addEventListener("click", function (event) {
                 event.preventDefault();
                 // Send payload.nonce to your server
@@ -89,6 +130,8 @@ const createTransaction = async (payload, amount) => {
   const transactionRespose = await response.json();
   console.log(transactionRespose);
 };
+
+// to request client token and set up drop-in on page load
 
 (async function () {
   const clientToken = await getClientToken();

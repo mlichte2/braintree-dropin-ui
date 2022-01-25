@@ -49,7 +49,7 @@ app.post("/checkout", (req, res) => {
   // Use payment method nonce here
   gateway.transaction.sale(
     {
-      amount: "20",
+      amount: "250",
       paymentMethodNonce: nonceFromTheClient,
       deviceData: deviceDataFromTheClient,
       options: {
